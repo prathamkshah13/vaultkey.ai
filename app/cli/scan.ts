@@ -21,7 +21,6 @@ function scanFolder(folderPath: string){
         else{
             const content = fs.readFileSync(fullPath, "utf-8")  //-> Now we have the content of the file. 
             const result = scanForSecrets(content) //-> Now we have the result of the scan. 
-
             if (result.length > 0){
                 console.log(fullPath, result) //-> Now we have the full path of the file and the result of the scan.
             }
@@ -29,7 +28,5 @@ function scanFolder(folderPath: string){
     }
 
 }
-
-
 
 scanFolder(targetPath)
