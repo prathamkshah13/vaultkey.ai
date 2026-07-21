@@ -2,10 +2,23 @@
 import { useState} from "react"
 import scanForSecrets from "../../lib/scanner"
 import { ScanResult } from "@/lib/scanResult"
+import {scoreRisk} from "../../lib/riskScorer"
+
 export default function ScanPage() {
     const [code, setCode] = useState("")
     const [results, setResults] = useState <ScanResult[]>([])
     console.log(results)
+
+    async function explainRisk (index: number){
+        const updatedResults = [...results]
+        updatedResults[index] = {...updatedResults[index], isLoadingExplanation: true}
+        setResults(updatedResults)
+        const explanation = await scoreRisk(results[index].provider, results[index].apiKey)
+
+        updatedResults[index] = {...updatedResults[index], explanation: explanation, isLoadingExplanation: false} 
+        setResults(updatedResults)
+    }
+
     return (
         <main className="min-h-screen bg-black text-white p-8">
             <h1 className = "text-4xl font-bold mb-8 text-white"> 
@@ -35,6 +48,12 @@ export default function ScanPage() {
                     <p className = "text-red-400">
                         {result.severity}
                     </p>
+                    <button
+                        className ="mt-2 bg-purple-600 text-white px-4 py-2 rounded -lg txt-sm hover: bg-purple-800 transition-colors duration-300"
+                        onClick = { () => explainRisk(index)}
+                        >
+                        Explain this Risk
+                    </button>
                 </div>
             ))}
          </div>

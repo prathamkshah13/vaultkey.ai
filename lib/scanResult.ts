@@ -5,4 +5,6 @@ export interface ScanResult {
     apiKey: string
     lineNumber: number
     severity: "low" | "medium" | "high"
+    explanation? : string
+    isLoadingExplanation? : boolean
 }
