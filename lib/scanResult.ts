@@ -7,4 +7,5 @@ export interface ScanResult {
     severity: "low" | "medium" | "high"
     explanation? : string
     isLoadingExplanation? : boolean
+    explanationError?: string
 }

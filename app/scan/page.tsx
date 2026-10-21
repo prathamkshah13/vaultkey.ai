@@ -2,21 +2,55 @@
 import { useState} from "react"
 import scanForSecrets from "../../lib/scanner"
 import { ScanResult } from "@/lib/scanResult"
-import {scoreRisk} from "../../lib/riskScorer"
 
 export default function ScanPage() {
     const [code, setCode] = useState("")
     const [results, setResults] = useState <ScanResult[]>([])
-    console.log(results)
 
     async function explainRisk (index: number){
         const updatedResults = [...results]
-        updatedResults[index] = {...updatedResults[index], isLoadingExplanation: true}
+        updatedResults[index] = {...updatedResults[index], isLoadingExplanation: true, explanationError: undefined}
         setResults(updatedResults)
-        const explanation = await scoreRisk(results[index].provider, results[index].apiKey)
+        try {
 
-        updatedResults[index] = {...updatedResults[index], explanation: explanation, isLoadingExplanation: false} 
-        setResults(updatedResults)
+            const response = await fetch("/api/risk-score", {
+            method : "POST",
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify({
+                provider: results[index].provider
+            })
+        })
+
+        const data = await response.json()
+        if (!response.ok){
+            throw new Error("Unable to generate  risk explanation")
+        }
+        const explanation = data.explanation
+        const finalResults = [... updatedResults]
+        finalResults[index] = {
+            ...finalResults[index],
+            explanation: explanation,
+            isLoadingExplanation: false
+        }
+        setResults(finalResults)
+
+            
+        } catch {
+            // we will handle failure here next 
+            const errorResults = [...updatedResults]
+            errorResults[index] = {
+                ...errorResults[index], 
+                isLoadingExplanation: false,
+                explanationError: "Unable to generate the explanation"
+            }
+
+            setResults(errorResults)
+        }
+
+        // updatedResults[index] = {...updatedResults[index], explanation: explanation, isLoadingExplanation: false} 
+        // setResults(updatedResults)
     }
 
     return (
@@ -54,6 +88,9 @@ export default function ScanPage() {
                         >
                         Explain this Risk
                     </button>
+                    {result.isLoadingExplanation && <p> Loading Explanation </p>}
+                    {result.explanation && <p> {result.explanation}</p>}
+                    {result.explanationError && <p className="text-red-400">{result. explanationError}</p>}
                 </div>
             ))}
          </div>
