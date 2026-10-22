@@ -2,7 +2,7 @@ export type Provider = "openai"|"anthropic"|"aws"
 
 export interface ScanResult {
     provider: Provider
-    apiKey: string
+    maskedValue: string
     lineNumber: number
     severity: "low" | "medium" | "high"
     explanation? : string

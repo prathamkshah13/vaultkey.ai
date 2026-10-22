@@ -1,4 +1,6 @@
 import {ScanResult, Provider} from "./scanResult";
+import { maskSecret } from "./maskSecret";
+
 export default function scanForSecrets(content : string): ScanResult[]{
     const result : ScanResult[] = [];
     const pattern = [{provider: "openai", regex: /sk-[a-zA-Z0-9]{20,}/g},
@@ -8,7 +10,7 @@ export default function scanForSecrets(content : string): ScanResult[]{
         const matches = content.match(regex);
         if (matches){
             for (const match of matches){
-                result.push({provider: provider as Provider, apiKey: match, lineNumber: 0, severity: "high"});
+                result.push({provider: provider as Provider, maskedValue: maskSecret(match), lineNumber: 0, severity: "high"});
                 
             }
         }

@@ -77,7 +77,7 @@ export default function ScanPage() {
                     <p className= "space-y-2">
                     {result.provider}
                     </p>
-                   <p className= "space-y-2" > {result.apiKey} </p>
+                   <p className= "space-y-2" > {result.maskedValue} </p>
                     <p className= "space-y-2"> {result.lineNumber} </p>
                     <p className = "text-red-400">
                         {result.severity}
