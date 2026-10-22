@@ -7,13 +7,14 @@ export default function scanForSecrets(content : string): ScanResult[]{
         {provider: "anthropic", regex: /sk-ant-[a-zA-Z0-9]{20,}/g}, 
         {provider: "aws", regex: /AKIA[a-zA-Z0-9]{16}/g}];
     for (const {provider, regex} of pattern){
-        const matches = content.match(regex);
-        if (matches){
-            for (const match of matches){
-                result.push({provider: provider as Provider, maskedValue: maskSecret(match), lineNumber: 0, severity: "high"});
+        const matches = content.matchAll(regex);
+        
+        for (const match of matches){
+            const lineNumber = content.slice(0, match.index).split("\n").length
+            result.push({provider: provider as Provider, maskedValue: maskSecret(match[0]), lineNumber:lineNumber, severity: "high"});
                 
-            }
         }
+        
     }
     return result;
 }
