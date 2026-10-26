@@ -1,4 +1,4 @@
-export type Provider = "openai"|"anthropic"|"aws" 
+export type Provider = "openai"|"anthropic"|"aws"|"github"|"stripe"|"slack"|"google"|"npm"
 
 export interface ScanResult {
     provider: Provider

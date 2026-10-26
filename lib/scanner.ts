@@ -1,12 +1,10 @@
 import {ScanResult, Provider} from "./scanResult";
 import { maskSecret } from "./maskSecret";
+import { detectors } from "./detector";
 
 export default function scanForSecrets(content : string): ScanResult[]{
     const findings : {offset: number, result: ScanResult}[] = [];
-    const pattern = [{provider: "openai", regex: /sk-[a-zA-Z0-9]{20,}/g},
-        {provider: "anthropic", regex: /sk-ant-[a-zA-Z0-9]{20,}/g},
-        {provider: "aws", regex: /AKIA[a-zA-Z0-9]{16}/g}];
-    for (const {provider, regex} of pattern){
+    for (const {provider, regex} of detectors){
         const matches = content.matchAll(regex);
 
         for (const match of matches){
