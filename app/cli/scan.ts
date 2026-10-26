@@ -7,6 +7,10 @@ const targetPath = process.argv[2] //Process.argv is an array that contains ever
 
 // console.log(items)
 // Writing the loop for reading the file names and reading the content of each file
+if(!targetPath){
+    console.log ("Usage: npm run scan -- <folder>")
+    process.exit(2)
+}
 
 function scanFolder(folderPath: string){
     const items = fs.readdirSync(folderPath) 
