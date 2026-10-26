@@ -1,0 +1,15 @@
+name: VaultKey CI
+on: [push, pull_request]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+
+      - run: npm ci
+      - run: npm test
+      - run: npx tsc --noEmit --incremental false
