@@ -15,7 +15,7 @@ export async function POST (request: Request){
     }
     const provider = body.provider
 
-    const  allowedProvider = ["openai", "anthropic", "aws"]
+    const  allowedProvider = ["openai", "anthropic", "aws", "github", "stripe", "slack", "google", "npm"]
 
     if (typeof provider != "string" || !allowedProvider.includes(provider)){
         return Response.json(
