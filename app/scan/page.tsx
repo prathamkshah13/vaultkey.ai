@@ -1,11 +1,48 @@
 "use client"
 import { useState} from "react"
-import scanForSecrets from "../../lib/scanner"
 import { ScanResult } from "@/lib/scanResult"
 
 export default function ScanPage() {
     const [code, setCode] = useState("")
     const [results, setResults] = useState <ScanResult[]>([])
+    const [isScanning, setIsScanning] = useState(false)
+    const [scanError, setScanError] =useState<string | null>(null)
+    const [savedScanId, setSavedScanId] = useState<string | null>(null)
+
+    async function handleScan(){
+        setIsScanning(true)
+        setScanError(null)
+        setSavedScanId(null)
+        setResults([])
+        try{
+            const response= await fetch ('/api/scans', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+
+            },
+            body: JSON.stringify({code}),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok){
+            throw new Error(data.error ?? 'Unable to scan and save')
+        }
+
+        setResults(data.findings)
+        setSavedScanId(data.scanId)
+
+        } catch (error){
+            setScanError(
+                error instanceof Error
+                ? error.message
+                : 'unable to scan and save' 
+            )
+        } finally {
+            setIsScanning(false)
+        }
+    }
 
     async function explainRisk (index: number){
         const updatedResults = [...results]
@@ -66,11 +103,24 @@ export default function ScanPage() {
             />
           <button 
           className = "mt-4 bg-blue-500 text-white px-4 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors duration-300"
-          onClick = {() => {console.log("Button Clicked")
-             setResults(scanForSecrets(code))}}
+          disabled ={isScanning}
+          onClick = {handleScan}
           >
-            Scan for Leaks
+            {isScanning ? 'Scanning..' : 'Scan for leaks'}
           </button>
+
+          {scanError &&(
+            <p role="alert" className="mt-4 text-red-400">
+                {scanError}
+            </p>
+          )}
+
+          {savedScanId && (
+            <p role="status" className="mt-4 text-green-400">
+              {results.length === 0 ? 'Saved — no findings.' : 'Saved.'}
+            </p>
+           )}
+
          <div className = "mt-8 space-y-4">
             {results.map((result, index) => (
                 <div key = {index} className = "mb-4 p-4 bg-gray-800 rounded-lg"> 
