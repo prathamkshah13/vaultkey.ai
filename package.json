@@ -10,7 +10,7 @@
     "lint": "eslint",
     "scan": "tsx app/cli/scan.ts",
     "test": "tsx --test tests/maskSecret.test.ts tests/scanner.test.ts",
-    "test:integration": "tsx --import ./tests/integration/setup-env.ts --test tests/integration/scans.ownership.test.ts"
+    "test:integration": "tsx --import ./tests/integration/setup-env.ts --test --test-concurrency=1 tests/integration/scans.ownership.test.ts tests/integration/scanDetailsAndReviewStatus.ownership.test.ts"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.33.0",
