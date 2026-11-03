@@ -2,6 +2,9 @@ import {auth0} from '@/lib/auth0'
 import { pool } from '@/lib/db'
 import scanForSecrets from '@/lib/scanner'
 import { saveScan } from '@/lib/scanRepository'
+import { readJsonBodyWithLimit } from '@/lib/readJsonBodyWithLimit'
+import { MAX_SCAN_REQUEST_BODY_BYTES } from '@/lib/requestBodyLimits'
+import { logServerError } from '@/lib/logServerError'
 
 
 export async function GET(){
@@ -15,10 +18,19 @@ export async function GET(){
 
     const ownerId = session.user.sub
 
-    const result = await pool.query(
-        'SELECT id, created_at FROM scan WHERE owner_id = $1 ORDER BY created_at DESC',
-        [ownerId]
-    )
+    let result
+    try {
+        result = await pool.query(
+            'SELECT id, created_at FROM scan WHERE owner_id = $1 ORDER BY created_at DESC',
+            [ownerId]
+        )
+    } catch (error) {
+        logServerError('GET /api/scans', error)
+        return Response.json(
+            { error: 'Unable to load scans' },
+            { status: 500 }
+        )
+    }
 
     return Response.json(
         {scans: result.rows}
@@ -56,18 +68,16 @@ export async function POST(request: Request){
         )
     }
 
-    //Read the submitted body. So we parse the request body. Parse (Convert JSON text into JavaScript)
-
-    let body: unknown
-    try {
-        body = await request.json()  //Read the body and prase its JSON
-    } catch {
+    //Read the submitted body. Size is enforced before any JSON parsing happens —
+    // see readJsonBodyWithLimit.ts — so an oversized payload never reaches JSON.parse.
+    const parsedBody = await readJsonBodyWithLimit(request, MAX_SCAN_REQUEST_BODY_BYTES)
+    if (!parsedBody.ok) {
         return Response.json(
-            { error: 'Invalid JSON'},
-            { status: 400}
-
+            { error: parsedBody.error },
+            { status: parsedBody.status }
         )
     }
+    const body = parsedBody.body
 
     if (
         typeof body !== 'object' || body === null || !('code' in body) || typeof body.code !== 'string'

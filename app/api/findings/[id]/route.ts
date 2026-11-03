@@ -1,6 +1,9 @@
 import { auth0 } from '@/lib/auth0'
 import { updateFindingReviewStatus } from '@/lib/scanRepository'
 import { isReviewStatus } from '@/lib/reviewStatus'
+import { readJsonBodyWithLimit } from '@/lib/readJsonBodyWithLimit'
+import { MAX_REVIEW_STATUS_REQUEST_BODY_BYTES } from '@/lib/requestBodyLimits'
+import { logServerError } from '@/lib/logServerError'
 
 export async function PATCH(
     request: Request,
@@ -31,15 +34,15 @@ export async function PATCH(
         )
     }
 
-    let body: unknown
-    try {
-        body = await request.json()
-    } catch {
+    // Size is enforced before any JSON parsing happens — see readJsonBodyWithLimit.ts.
+    const parsedBody = await readJsonBodyWithLimit(request, MAX_REVIEW_STATUS_REQUEST_BODY_BYTES)
+    if (!parsedBody.ok) {
         return Response.json(
-            { error: 'Invalid JSON' },
-            { status: 400 }
+            { error: parsedBody.error },
+            { status: parsedBody.status }
         )
     }
+    const body = parsedBody.body
 
     if (
         typeof body !== 'object' || body === null ||
@@ -54,7 +57,16 @@ export async function PATCH(
     const { id } = await params
     const ownerId = session.user.sub
 
-    const updated = await updateFindingReviewStatus(id, ownerId, body.reviewStatus)
+    let updated
+    try {
+        updated = await updateFindingReviewStatus(id, ownerId, body.reviewStatus)
+    } catch (error) {
+        logServerError('PATCH /api/findings/[id]', error)
+        return Response.json(
+            { error: 'Unable to update finding' },
+            { status: 500 }
+        )
+    }
 
     // Same response whether the finding doesn't exist or its scan belongs to someone
     // else — a request body can't grant access by supplying a different owner's ID,

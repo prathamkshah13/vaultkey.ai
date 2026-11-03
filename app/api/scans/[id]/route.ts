@@ -1,5 +1,6 @@
 import { auth0 } from '@/lib/auth0'
 import { getScanWithFindings } from '@/lib/scanRepository'
+import { logServerError } from '@/lib/logServerError'
 
 export async function GET(
     _request: Request,
@@ -16,7 +17,16 @@ export async function GET(
     const { id } = await params
     const ownerId = session.user.sub
 
-    const result = await getScanWithFindings(id, ownerId)
+    let result
+    try {
+        result = await getScanWithFindings(id, ownerId)
+    } catch (error) {
+        logServerError('GET /api/scans/[id]', error)
+        return Response.json(
+            { error: 'Unable to load scan' },
+            { status: 500 }
+        )
+    }
 
     // Same response whether the scan doesn't exist or belongs to someone else — the
     // caller has no way to tell "not found" apart from "not yours".
