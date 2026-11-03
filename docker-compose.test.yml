@@ -1,0 +1,16 @@
+services:
+  postgres-test:
+    image: postgres:17
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_USER: vaultkey_test
+      POSTGRES_PASSWORD: vaultkey_test
+      POSTGRES_DB: vaultkey_test_disposable
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vaultkey_test -d vaultkey_test_disposable"]
+      interval: 2s
+      timeout: 2s
+      retries: 15

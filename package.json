@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "scan": "tsx app/cli/scan.ts",
-    "test": "tsx --test tests/maskSecret.test.ts tests/scanner.test.ts"
+    "test": "tsx --test tests/maskSecret.test.ts tests/scanner.test.ts",
+    "test:integration": "tsx --import ./tests/integration/setup-env.ts --test tests/integration/scans.ownership.test.ts"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.33.0",
@@ -17,7 +18,8 @@
     "next": "16.2.7",
     "pg": "^8.23.1",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
