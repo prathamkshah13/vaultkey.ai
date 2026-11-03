@@ -46,7 +46,7 @@ export default function HistoryPage(){
             }
         }
 
-        void loadScans() 
+        void loadScans()
         return () => controller.abort()
     }, [])
 
@@ -57,7 +57,7 @@ export default function HistoryPage(){
             {history.status === 'loading' && <p> loading scans ...</p>}
             {history.status === 'error' && <p role="alert">{history.message}</p>}
 
-            {history.status === 'success' && 
+            {history.status === 'success' &&
             (history.scans.length === 0 ?( <p> No saves scans yet</p> ): (
                 <ul>
                     {/* map turns each scan into a row. Its ID gives React a stable key */}
