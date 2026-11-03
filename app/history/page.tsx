@@ -1,5 +1,6 @@
 'use client'
 import { useEffect,useState } from "react"
+import Link from 'next/link'
 type Scan = {
     id: string
     created_at: string
@@ -63,7 +64,9 @@ export default function HistoryPage(){
                     {/* map turns each scan into a row. Its ID gives React a stable key */}
                     {history.scans.map((scan) =>(
                         <li key = {scan.id}>
-                            {new Date(scan.created_at).toLocaleString()}.{scan.id}
+                            <Link href={`/history/${scan.id}`}>
+                            {new Date (scan.created_at).toLocaleString()}
+                            </Link>
                         </li>
                     ))}
                 </ul>
